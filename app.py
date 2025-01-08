@@ -1,146 +1,129 @@
-import re
-from flask import Flask, request, jsonify
-from flask_cors import CORS  # Import CORS
-from PIL import Image
-from diffusers import StableDiffusionXLPipeline
-from diffusers import StableDiffusionPipeline
-import torch
-import random
-import io
-import base64
-import json
 from langchain_core.tools import tool
 from langchain_ollama.chat_models import ChatOllama
-from langchain.agents import initialize_agent, AgentType
-from langchain.memory import ConversationBufferMemory
+from chat import get_response  # Assuming you have a `get_response` function elsewhere
+from diffusers import StableDiffusionXLPipeline, StableDiffusionPipeline
+import random
+import torch
+import base64
+from PIL import Image
+from flask import Flask,request,jsonify
+import io
 
-# Initialize Flask app
-app = Flask(__name__)
-
-# Enable CORS for all routes (or specify particular origins)
-CORS(app)  # This will allow all domains to access your Flask app
-
-# Alternatively, specify CORS settings for particular routes or origins:
-# CORS(app, resources={r"/process": {"origins": "http://example.com"}})
-
-# Initialize LLM (ChatOllama)
-llm = ChatOllama(model='gemma2:2b')
-
-def get_image(logo, prompt):
-    pipe = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16, 
-            variant="fp16", use_safetensors=True).to('cuda')
-    pipe.to('cuda')
-
-    if not prompt:
-        return jsonify({"error": "No prompt provided"}), 400
-
-    # Generate image based on the provided prompt
-    generator = torch.manual_seed(random.randint(1232323,1489341482))
-
+app=Flask(__name__)
+# Initialize the model
+llm = ChatOllama(model='llama3.1', temperature=0.9)
+@tool
+def create_image(prompt):
+    """
+    Generates a basic image based on the provided prompt using Stable Diffusion.
+    """
     try:
+        pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16)
+        pipe = pipe.to("mps")  # Ensure compatibility with your hardware
+        image = pipe(prompt).images[0]
+
+        # Convert image to base64 and return
+        img_byte_array = io.BytesIO()
+        image.save(img_byte_array, format='PNG')
+        img_byte_array.seek(0)
+        image_base64 = base64.b64encode(img_byte_array.read()).decode('utf-8')
+
+        return image_base64
+    except Exception as e:
+        return str(e)
+
+@tool
+def generate_image_with_logo(prompt):
+    """
+    Generates a basic image based on the provided prompt logo using Stable Diffusion.
+    """
+    logo=Image.open('logo.png')
+    try:
+        pipe = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16,
+                                                        variant="fp16", use_safetensors=True).to('cuda')
+
+        # Generate image based on the provided prompt
+        generator = torch.manual_seed(random.randint(1232323,1489341482))
+
         image = pipe(
-            prompt='generate poster with texts '+prompt,
-            negative_prompt="ugly, deformed, noisy, blurry, , noisy, low contrast (((bad anatomy))) watermark, dummy ,children, bad hands, (((incomplete limbs)))",
+            prompt='generate poster with texts' + prompt,
+            negative_prompt="ugly, deformed, noisy, blurry,low contrast, watermark",
             num_inference_steps=50,
             generator=generator,
             guidance_scale=15.0,
             denoise=1.0
         ).images[0]
-        logo_width = int(image.size[0] * 0.15)  # 10% of canvas width
+
+        logo_width = int(image.size[0] * 0.15)  # 15% of canvas width
         logo_height = int(logo.height * (logo_width / logo.width))  # Maintain aspect ratio
         logo = logo.resize((logo_width, logo_height), resample=Image.Resampling.LANCZOS)
         logo = logo.convert("RGBA")
 
         # Randomly place the logo in the left or right corner
-        if random.choice([True, False]):  # Randomly choose left or right corner
-            logo_position = (10, 10)  # Left corner
-        else:
-            logo_position = (image.size[0] - logo_width - 10, 10)  # Right corner
+        logo_position = (10, 10) if random.choice([True, False]) else (image.size[0] - logo_width - 10, 10)
 
-        # Paste the logo onto the canvas and update the mask
+        # Paste the logo onto the canvas
         image.paste(logo, logo_position, logo)
-        return image
+
+        # Convert image to base64 and return
+        img_byte_array = io.BytesIO()
+        image.save(img_byte_array, format='PNG')
+        img_byte_array.seek(0)
+        image_base64 = base64.b64encode(img_byte_array.read()).decode('utf-8')
+
+        return image_base64
     except Exception as e:
         return str(e)
 
-# Modify the tool to accept a single JSON input
+# Tool to handle generic questions like "how are you?" using LLM
 @tool
-def chat_normal(prompt):
-    """
-    Handles user input and either generates an image or provides responses.
-    If the prompt contains greetings, returns a greeting response.
-    """
-    greetings = ["hello", "hi", "hey", "good morning", "good afternoon", "good evening", "howdy"]
-    if any(greeting in prompt.lower() for greeting in greetings):
-        return "Hello! 😊 How can I assist you today? What would you like to create? For example, would you like to promote a product, create a campaign, or design something special?"
-    return "How can I assist you today with your graphic creation?"
+def respond_to_question(question, history):
+    """This function is responsible for responding to general questions for the user"""
+    response = get_response(user_input=question, conversation_history=history)
+    print(response)
+    return response.content
 
-@tool
-def create_image(prompt):
-    """
-    Generates an image based on the provided prompt using Stable Diffusion.
-    """
-    pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16)
-    pipe = pipe.to("mps")  # Ensure compatibility with your hardware
-    image = pipe(prompt).images[0]
-    image.show()
-    return image
+# Bind tools together
+tools = [create_image,generate_image_with_logo,respond_to_question]
+llm_with_tools = llm.bind_tools(tools=tools)
 
-@tool
-def process_image_with_prompt_v2(input_data: str) -> str:
+def call_method(llm_respond):
     """
-    Processes the image and prompt from a JSON input, either generating a graphic or returning an image.
+    Calls a function dynamically based on the 'name' key in the provided dictionary.
     """
-    try:
-        data = json.loads(input_data)
-        prompt = data.get('prompt', None)
-        if not prompt:
-            return "Prompt is required."
-        
-        image_base64 = data.get('image', None)
-        if image_base64:
-            image_bytes = base64.b64decode(image_base64)
-            logo = Image.open(io.BytesIO(image_bytes))
-            processed_image = get_image(logo=logo, prompt=prompt)
-            return processed_image
+    # Ensure there's at least one tool call in the response
+    if len(llm_respond.tool_calls) > 0:
+        data = llm_respond.tool_calls[0]  # Extract the first tool call data
+        print(f"Tool Call Data: {data}")
+
+        # Extract function name and arguments from the dictionary
+        func_name = data.get('name')
+        args = data.get('args', {})
+
+        # Check if the function exists in the global namespace
+        func = globals().get(func_name)
+
+        # If the function is found, call it with the arguments
+        if func:
+            print(f"Calling function {func_name} with arguments: {args}")
+            return func.invoke(args)
         else:
-            result = llm.generate(prompt)  # Ensure the correct method for llm is used
-            return result
-    except Exception as e:
-        return str(e)
+            return f"Function '{func_name}' not found."
+    else:
+        return "No tool calls found in the response."
 
-# Update the tools to use the new version
-tools = [process_image_with_prompt_v2, chat_normal, create_image]
 
-# Initialize memory to store conversation history
-memory = ConversationBufferMemory(memory_key="history")
-
-# Initialize the agent with the updated tool
-agent = initialize_agent(
-    tools=tools, 
-    llm=llm, 
-    agent_type=AgentType.ZERO_SHOT_REACT_DESCRIPTION, 
-    verbose=True,
-    memory=memory
-)
-
-@app.route('/process', methods=['POST'])
+@app.route('/process',methods=["POST"])
 def process():
-    # Get the JSON body
-    data = request.get_json()
-
-    # Check if a prompt is provided
-    prompt = data.get('prompt', None)
-    if not prompt:
-        return jsonify({"error": "Prompt is required."}), 400
+    if 'prompt' not in request.form:
+        return jsonify({"error": "No prompt provided"}), 400
+    # Get the file and the prompt
+    prompt = request.form['prompt']
+    res=llm_with_tools.invoke(prompt)
+    res=call_method(res)
+    print(res)
+    return res
     
-    try:
-        # Call the agent to process the image and/or prompt
-        result = agent.run(json.dumps(data))  # Send the data as JSON string
-        
-        return jsonify({"result": result}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    
+if __name__=='__main__':
+    app.run()
