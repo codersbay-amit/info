@@ -47,8 +47,8 @@ def create_image(prompt):
         image.save(img_byte_array, format='PNG')
         img_byte_array.seek(0)
         image_base64 = base64.b64encode(img_byte_array.read()).decode('utf-8')
-
-        return jsonify({"type": base64, "data": image_base64})
+        
+        return jsonify({"type": "base64", "data": image_base64})
     except Exception as e:
         return str(e)
 
@@ -87,7 +87,7 @@ def generate_image_with_logo(prompt,session_id):
         img_byte_array.seek(0)
         image_base64 = base64.b64encode(img_byte_array.read()).decode('utf-8')
 
-        return jsonify({"type": base64, "data": image_base64})
+        return jsonify({"type": "base64", "data": image_base64})
     except Exception as e:
         return str(e)
 
