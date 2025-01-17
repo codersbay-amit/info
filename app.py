@@ -18,45 +18,13 @@ CORS(app)
 # Initialize the model
 llm = ChatOllama(model='llama3.1', temperature=0.9)
 
-# Global dictionary to manage session history
 session_history = {}
 
-@tool
-def create_image(prompt):
-    """
-    Generates a basic image based on the provided prompt using Stable Diffusion.
-    """
-    try:
-        pipe = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16,
-                                                        variant="fp16", use_safetensors=True).to('cuda')
-        # Generate image based on the provided prompt
-        generator = torch.manual_seed(random.randint(1232323, 1489341482))
-
-        image = pipe(
-            prompt="create the promotional poster "+prompt,
-            negative_prompt="ugly, deformed, noisy, blurry,low contrast, watermark",
-            num_inference_steps=50,
-            generator=generator,
-            height=1024,
-            width=1024,
-            guidance_scale=15.0,
-            denoise=1.0
-        ).images[0]
-
-        # Convert image to base64 and return
-        img_byte_array = io.BytesIO()
-        image.save(img_byte_array, format='PNG')
-        img_byte_array.seek(0)
-        image_base64 = base64.b64encode(img_byte_array.read()).decode('utf-8')
-        
-        return jsonify({"type": "base64", "data": image_base64})
-    except Exception as e:
-        return str(e)
-    
 @tool
 def generate_image_with_logo(prompt,session_id):
     """
     Generates a basic image based on the provided prompt with a logo using Stable Diffusion.
+    and prompt should have brandkit information then this function will not work
     """
     logo = Image.open("logo"+session_id+".png")
     try:
@@ -111,7 +79,7 @@ def respond_to_question(question, session_id):
 
 
 # Bind tools together
-tools = [create_image, generate_image_with_logo, respond_to_question]
+tools = [ generate_image_with_logo, respond_to_question]
 llm_with_tools = llm.bind_tools(tools=tools)
 
 
