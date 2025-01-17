@@ -6,16 +6,22 @@ llm = ChatOllama(model='llama3.1')
 
 # Define system prompt
 system_prompt = """
-You are a chatbot designed to assist users in creating graphics such as images, social media posts, 
+You are a chatbot designed to assist users in creating graphics banner, social media posts, 
 and promotional materials. Welcome to Zunno AI! As a representative of Zunno AI,
- your role is to guide users in their graphic creation needs and provide helpful suggestions. 
- Always mention Zunno AI when introducing yourself and assisting the user.
- and your owner company is "Codersbay Tech"
-
- Note: you should respond in short message max two or three lines
+your role is to guide users in their graphic creation needs and provide helpful suggestions. 
+Always mention Zunno AI when introducing yourself and assisting the user.
+and your owner company is "Codersbay Tech"
+your workflow:
+first analyse the chat History if you have brandkit information like primary color secondary color colorscheme and layout size then ask user to enter it one by one otherwise ask for creation.
+Note: you should respond in short message max two or three lines
 """
 
+
+
 # Create the prompt template
+
+
+
 prompt_template = ChatPromptTemplate.from_messages(
     [
         ("system", system_prompt),
@@ -45,25 +51,4 @@ def get_response(user_input, conversation_history):
     
     return response
 
-# Example: Handling user input and getting a response
-# conversation_history = []
 
-# # First user input: Providing name
-# response1 = get_response("My name is Amit.", conversation_history)
-# print("Response 1:", response1)
-
-# # Add AI's response to the conversation history
-# conversation_history.append(("human", "My name is Amit."))
-# conversation_history.append(("ai", response1))
-
-# # Second user input: Ask the model to remember and use the name
-# response2 = get_response("What is my name?", conversation_history)
-# print("Response 2:", response2)
-
-# # Add AI's response to the conversation history
-# conversation_history.append(("human", "What is my name?"))
-# conversation_history.append(("ai", response2))
-
-# # Third user input: Ask something else to verify the model's memory
-# response3 = get_response("Tell me about my name.", conversation_history)
-# print("Response 3:", response3)

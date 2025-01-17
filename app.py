@@ -29,7 +29,6 @@ def create_image(prompt):
     try:
         pipe = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16,
                                                         variant="fp16", use_safetensors=True).to('cuda')
-
         # Generate image based on the provided prompt
         generator = torch.manual_seed(random.randint(1232323, 1489341482))
 
@@ -51,8 +50,7 @@ def create_image(prompt):
         return jsonify({"type": "base64", "data": image_base64})
     except Exception as e:
         return str(e)
-
-
+    
 @tool
 def generate_image_with_logo(prompt,session_id):
     """
@@ -160,6 +158,7 @@ def process():
         prompt=prompt+" with this logo"
 
     # Process the prompt with the llm
+
     res = llm_with_tools.invoke(prompt)
     
     # Call the appropriate method for the tool used
