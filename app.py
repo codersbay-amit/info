@@ -33,7 +33,7 @@ def create_image(prompt):
         generator = torch.manual_seed(random.randint(1232323, 1489341482))
 
         image = pipe(
-            prompt=prompt,
+            prompt="create the promotional poster "+prompt,
             negative_prompt="ugly, deformed, noisy, blurry,low contrast, watermark",
             num_inference_steps=50,
             generator=generator,
