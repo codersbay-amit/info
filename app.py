@@ -26,7 +26,6 @@ def generate_image_with_logo(prompt,session_id):
     Generates a basic image based on the provided prompt with a logo using Stable Diffusion.
     and prompt should have brandkit information then this function will not work
     """
-    logo = Image.open("logo"+session_id+".png")
     try:
         pipe = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16,
                                                         variant="fp16", use_safetensors=True).to('cuda')
