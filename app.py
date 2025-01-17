@@ -37,8 +37,8 @@ def create_image(prompt):
             negative_prompt="ugly, deformed, noisy, blurry,low contrast, watermark",
             num_inference_steps=50,
             generator=generator,
-            height=320,
-            width=640,
+            height=1024,
+            width=1024,
             guidance_scale=15.0,
             denoise=1.0
         ).images[0]
