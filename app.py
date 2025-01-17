@@ -33,21 +33,21 @@ def generate_image_with_logo(prompt,session_id):
         # Generate image based on the provided prompt
         generator = torch.manual_seed(random.randint(1232323, 1489341482))
         image = pipe(
-            prompt='generate poster with texts ' + prompt,
+            prompt='generate a poster with visual texts ' + prompt,
             negative_prompt="ugly, deformed, noisy, blurry,low contrast, watermark",
             num_inference_steps=50,
             generator=generator,
             guidance_scale=15.0,
             denoise=1.0
         ).images[0]
-        logo_width = int(image.size[0] * 0.15)  # 15% of canvas width
-        logo_height = int(logo.height * (logo_width / logo.width))  # Maintain aspect ratio
-        logo = logo.resize((logo_width, logo_height), resample=Image.Resampling.LANCZOS)
-        logo = logo.convert("RGBA")
-        # Randomly place the logo in the left or right corner
-        logo_position = (10, 10) if random.choice([True, False]) else (image.size[0] - logo_width - 10, 10)
-        # Paste the logo onto the canvas
-        image.paste(logo, logo_position, logo)
+        # logo_width = int(image.size[0] * 0.15)  # 15% of canvas width
+        # logo_height = int(logo.height * (logo_width / logo.width))  # Maintain aspect ratio
+        # logo = logo.resize((logo_width, logo_height), resample=Image.Resampling.LANCZOS)
+        # logo = logo.convert("RGBA")
+        # # Randomly place the logo in the left or right corner
+        # logo_position = (10, 10) if random.choice([True, False]) else (image.size[0] - logo_width - 10, 10)
+        # # Paste the logo onto the canvas
+        # image.paste(logo, logo_position, logo)
 
         # Convert image to base64 and return
         img_byte_array = io.BytesIO()
