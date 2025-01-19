@@ -44,7 +44,7 @@ def get_response(user_input, conversation_history):
 
   
 
-    response=chain.invoke({"input":user_input})
+    response=chain.invoke({"input":user_input,"chat_history":conversation_history})
     return response
 
 def prompt_formation(user_input, conversation_history):
