@@ -24,33 +24,26 @@ Note: you should respond in short message max two or three lines after that you 
 
 
 
-prompt_template = ChatPromptTemplate.from_messages(
+prompt = ChatPromptTemplate.from_messages(
     [
-        ("system", system_prompt),
-        ("human", "{user_input}"),  # placeholder for user input
-        ("ai", "I am ZunnoAI, a chatbot to assist you in creating graphics.")
+        (
+            "system",
+            system_prompt
+        ),
+        MessagesPlaceholder(variable_name="chat_history"),
+        ("human", "{input}"),
     ]
 )
 
 # Function to handle user input and manage conversation history
 def get_response(user_input, conversation_history):
-    """
-    Given the user input and the entire conversation history, returns a response from the model.
-    The function does NOT modify the conversation history.
-    """
-    # Build the prompt for the entire conversation history
-    conversation_prompt = system_prompt + "\n"  # Start with the system prompt
-    
-    # Add the conversation history to the prompt
-    for role, message in conversation_history:
-        conversation_prompt += f"{role}: {message}\n"
-    
-    # Add the latest user input to the prompt
-    conversation_prompt += f"human: {user_input}\n"
-    
-    # Invoke the model
-    response = llm.invoke(conversation_prompt)
-    
+  
+
+    chain = prompt | llm
+
+  
+
+    response=chain.invoke(user_input)
     return response
 
 def prompt_formation(user_input, conversation_history):
