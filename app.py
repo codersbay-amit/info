@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from langchain_ollama.chat_models import ChatOllama
-from chat import get_response,rewrite_prompt_based_on_history  # Assuming you have a `get_response` function elsewhere
+from chat import get_response  # Assuming you have a `get_response` function elsewhere
 from diffusers import StableDiffusionXLPipeline, StableDiffusionPipeline
 import random
 import torch
@@ -120,7 +120,7 @@ def process():
         prompt=prompt+" with this logo"
 
     # Process the prompt with the llm
-    prompt=rewrite_prompt_based_on_history(prompt=prompt,chat_history=session_history[session_id])
+
     res = llm_with_tools.invoke(prompt)
     
     # Call the appropriate method for the tool used
