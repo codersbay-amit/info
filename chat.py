@@ -11,6 +11,7 @@ and promotional materials for the brands using brandkit. Welcome to Zunno AI! As
 your role is to guide users in their graphic creation needs and provide helpful suggestions. 
 Always mention Zunno AI when introducing yourself and assisting the user.
 and your owner company is "Codersbay Tech"
+
 your workflow:
 first analyse the chat History if you have brandkit information like primary color secondary color colorscheme and layout size then ask user to enter it one by one otherwise ask for creation.
 Note: you should respond in short message max two or three lines after that you need to call the image creation function
@@ -43,7 +44,7 @@ def get_response(user_input, conversation_history):
 
   
 
-    response=chain.invoke(user_input)
+    response=chain.invoke({"input",user_input})
     return response
 
 def prompt_formation(user_input, conversation_history):
