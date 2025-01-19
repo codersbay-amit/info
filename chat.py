@@ -1,4 +1,4 @@
-from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import ChatPromptTemplate,MessagesPlaceholder
 from langchain.chat_models import ChatOllama
 
 # Initialize the model
@@ -15,6 +15,17 @@ your workflow:
 first analyse the chat History if you have brandkit information like primary color secondary color colorscheme and layout size then ask user to enter it one by one otherwise ask for creation.
 Note: you should respond in short message max two or three lines after that you need to call the image creation function
 """
+system_prompt2="""Given a chat history and the latest user question \
+which might reference context in the chat history, formulate a standalone question \
+which can be understood without the chat history. Do NOT answer the question, \
+just reformulate it if needed and otherwise return it as is."""
+contextualize_q_prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", system_prompt2),
+        MessagesPlaceholder("chat_history"),
+        ("human", "{input}"),
+    ]
+)
 
 
 
@@ -50,5 +61,42 @@ def get_response(user_input, conversation_history):
     response = llm.invoke(conversation_prompt)
     
     return response
+
+import ollama
+
+# Initialize Ollama client
+ollama_api = ollama
+
+def rewrite_prompt_based_on_history(prompt,chat_history ):
+    """
+    This function rewrites the given prompt using the chat history to make it
+    clearer and more understandable with Ollama Llama 3.1 model.
+    :param chat_history: List of previous conversations [(user_input, assistant_response), ...]
+    :param prompt: The new prompt that needs clarification
+    :return: Rewritten prompt
+    """
+    
+    # Create a conversation context from the history
+    context = ""
+    for role, message in chat_history:
+        context += f"{role}: {message}\n"
+    
+    # Add the new prompt to the context
+    context += f"User: {prompt}\nAssistant:"
+
+    # Use Ollama's Llama 3.1 to rewrite the prompt
+    try:
+        response = ollama_api.chat(model="llama3.1", messages=[{"role": "user", "content": f"Given the following chat history, can you rewrite the user's latest prompt to make it clearer?\n\n{context}"}])
+        
+        # Extract the rewritten prompt from the response
+        rewritten_prompt = response["text"].strip()
+        print(rewritten_prompt)
+        return rewritten_prompt
+    except Exception as e:
+        print("Error:", e)
+        return None
+
+# Example chat history and prompt
+
 
 

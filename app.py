@@ -1,6 +1,6 @@
 from langchain_core.tools import tool
 from langchain_ollama.chat_models import ChatOllama
-from chat import get_response  # Assuming you have a `get_response` function elsewhere
+from chat import get_response,rewrite_prompt_based_on_history  # Assuming you have a `get_response` function elsewhere
 from diffusers import StableDiffusionXLPipeline, StableDiffusionPipeline
 import random
 import torch
@@ -39,14 +39,7 @@ def generate_image_with_logo(prompt,session_id):
             guidance_scale=15.0,
             denoise=1.0
         ).images[0]
-        # logo_width = int(image.size[0] * 0.15)  # 15% of canvas width
-        # logo_height = int(logo.height * (logo_width / logo.width))  # Maintain aspect ratio
-        # logo = logo.resize((logo_width, logo_height), resample=Image.Resampling.LANCZOS)
-        # logo = logo.convert("RGBA")
-        # # Randomly place the logo in the left or right corner
-        # logo_position = (10, 10) if random.choice([True, False]) else (image.size[0] - logo_width - 10, 10)
-        # # Paste the logo onto the canvas
-        # image.paste(logo, logo_position, logo)
+        
 
         # Convert image to base64 and return
         img_byte_array = io.BytesIO()
@@ -127,7 +120,7 @@ def process():
         prompt=prompt+" with this logo"
 
     # Process the prompt with the llm
-
+    prompt=rewrite_prompt_based_on_history(prompt=prompt,chat_history=session_history[session_id])
     res = llm_with_tools.invoke(prompt)
     
     # Call the appropriate method for the tool used
