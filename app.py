@@ -75,8 +75,6 @@ def respond_to_question(question, session_id):
         if "prompt" in data.keys():
             print("using prompt")
             image= generate_image_with_logo(data['prompt'])
-            image.save("images/image_"+str(session_id)+".png")
-            image=refiner(image_path="images/image_"+str(session_id)+".png",title=data['title'],subtitle=data['subtitle'])
             img_byte_array = io.BytesIO()
             image.save(img_byte_array, format='PNG')
             img_byte_array.seek(0)
