@@ -28,6 +28,25 @@ llm = ChatOllama(model='llama3.1', temperature=0.9)
 session_history = {}
 
 
+def generate_image(prompt):
+        """
+        Generates a basic image based on the provided prompt with a logo using Stable Diffusion.
+        and prompt should have brandkit information then this function will not work
+        """
+        pipe = StableDiffusionXLPipeline.from_pretrained("stabilityai/stable-diffusion-xl-base-1.0", torch_dtype=torch.float16,
+                                                        variant="fp16", use_safetensors=True).to('cuda')
+       
+        generator = torch.manual_seed(random.randint(1232323, 1489341482))
+        image = pipe(
+            prompt='realistic ' + prompt,
+            negative_prompt="ugly, deformed, noisy, blurry,low contrast, watermark",
+            num_inference_steps=50,
+            generator=generator,
+            guidance_scale=15.0,
+            denoise=1.0
+        ).images[0]
+        
+        return image
 def generate_image_with_logo(prompt):
         """
         Generates a basic image based on the provided prompt with a logo using Stable Diffusion.
@@ -74,7 +93,7 @@ def respond_to_question(question, session_id):
     if data is not None:
         if "prompt" in data.keys():
             print("using prompt")
-            image= generate_image_with_logo(data['prompt'])
+            image= generate_image(data['prompt'])
             img_byte_array = io.BytesIO()
             image.save(img_byte_array, format='PNG')
             img_byte_array.seek(0)
