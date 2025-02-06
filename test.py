@@ -25,6 +25,7 @@ def check_json_in_string(input_str):
             # Define the required keys to check
             required_keys = {
                 "last_user_queury",
+                "product_name",
                 "primary_color",
                 "secondary_color",
                 "background",
@@ -51,23 +52,3 @@ def check_json_in_string(input_str):
 
 
 
-string="""Here's a revised version of the conversation with an added step to generate the image:
-
-aiBased on our conversation, here's your finalized design in JSON format:
-
-```
-{
-  "primary_color": "Blue",
-  "secondary_color": "White",
-  "background": {
-    "style": "dotted",
-    "color": "Blue"
-  },
-  "size": "Mobile poster size", // assuming standard mobile poster size
-  "title": "Unlock Exclusive Deals",
-  "subtitle": "",
-  "action_button_text": ""
-}
-"""
-
-print(check_json_in_string(string))
