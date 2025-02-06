@@ -73,6 +73,7 @@ def respond_to_question(question, session_id):
     print(response.content)
     if data is not None:
         if "prompt" in data.keys():
+            print("using prompt")
             image= generate_image_with_logo(data['prompt'])
             image.save("images/image_"+str(session_id)+".png")
             image=refiner(image_path="images/image_"+str(session_id)+".png",title=data['title'],subtitle=data['subtitle'])
@@ -82,6 +83,7 @@ def respond_to_question(question, session_id):
             image_base64 = base64.b64encode(img_byte_array.read()).decode('utf-8')
             return jsonify({"type": "base64", "data": image_base64})
         else:
+            print("using brandkit")
             prompt=geneate_prompt(data)
             image= generate_image_with_logo(prompt)
             image.save("images/image_"+str(session_id)+".png")
