@@ -24,7 +24,6 @@ def check_json_in_string(input_str):
             
             # Define the required keys to check
             required_keys = {
-                "last_user_queury",
                 "product_name",
                 "primary_color",
                 "secondary_color",
