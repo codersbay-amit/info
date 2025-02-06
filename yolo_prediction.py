@@ -151,6 +151,4 @@ def getBoxes(image_path):
     return bounding_boxes
 
 
-print(getBoxes("download.png"))
-
 

@@ -20,7 +20,7 @@ def geneate_prompt(data,user_input="genearate prompt",):
 
 
     note: your prompt should be like this (use this pattern to generate prompt for image generation) :
-        ' an advertisement for , (user context), simple design, with the title ("title_text" text logo),with the subtitle ("subtitle_text" text logo),with the button_text ("button_text" text logo), clean design, vibrant images, product photography, blank dark_blue background '
+        ' an advertisement for , ("letest_user_quesry" user context), simple design, with the title ("title_text" text logo),with the subtitle ("subtitle_text" text logo),with the button_text ("button_text" text logo), clean design, vibrant images, product photography, blank dark_blue background '
 
 
     and prompt should short and consize

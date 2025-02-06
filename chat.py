@@ -23,6 +23,7 @@ Brandkit Info:
 Image creation if user select prompt option then ask for the prompt option:
     then ask to enter enter the prompt after getting the users prompt return the prompt as json
     with 'prompt' key
+    and do not  suggest text for the title, subtitle, and action button in this option
 Image Creation if user select the brand kit optionif user select the brand kit option:
     Once you have the brandkit info, you’ll suggest text for the title, subtitle, and action button based on the context of our chat.
     You’ll review and approve or modify the text.
