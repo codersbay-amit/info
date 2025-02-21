@@ -160,7 +160,7 @@ def chat():
         return jsonify({"error": "No prompt or session_id provided"}), 400
     prompt = request.form['prompt']
     history = request.form['history']
-    print('history*****',history[0])
+    print('history*****',history.split('/n'))
     response=get_response_chat(user_input=prompt,conversation_history=history)
     return jsonify({"data":response})
     
