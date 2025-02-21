@@ -1,4 +1,4 @@
-from langchain import HumanMessage, AIMessage
+from langchain_core.messages import HumanMessage,AIMessage
 
 def convert_conversation_to_messages(conversation: str):
     """
