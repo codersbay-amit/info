@@ -41,5 +41,5 @@ def get_response_chat(user_input, conversation_history):
 
   
 
-    response=chain.invoke({"input":user_input,"chat_history":conversation_history}).response
+    response=chain.invoke({"input":user_input,"chat_history":conversation_history}).content
     return response
