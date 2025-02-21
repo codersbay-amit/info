@@ -19,7 +19,7 @@ Privacy Respect: Handle all user information with the utmost respect for privacy
 Your goal is to provide seamless, engaging, and informative experiences for the user while maintaining a smooth flow of conversation through effective history management.
 
 output format:
-your response should be in html script
+your response should stylised by html tags 
 """
 
 prompt = ChatPromptTemplate.from_messages(
