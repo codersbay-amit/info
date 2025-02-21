@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 from ultralytics import YOLO
 from rembg.bg import remove
 
+u4 
 def sharpen_image(image):
     # Define a sharpening kernel
     sharpening_kernel = np.array([
@@ -17,6 +18,8 @@ def sharpen_image(image):
     sharpened_image = cv2.filter2D(image, -1, sharpening_kernel)
     
     return sharpened_image
+
+
 
 def getBoxes(image_path):
     image = Image.open(image_path)
@@ -64,6 +67,4 @@ def getBoxes(image_path):
 
 
 
-
-getBoxes('61gmeFOm5vL.png')
 

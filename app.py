@@ -13,6 +13,7 @@ from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from test import check_json_in_string
+from image_with_product import generate_image_with_product
 import io
 from langchain_core.messages import HumanMessage,AIMessage
 import torch
@@ -91,14 +92,18 @@ def respond_to_question(question, session_id):
     session_history[session_id].append("ai"+response.content+"\n")
     print(response.content)
     if data is not None:
+
         if "prompt" in data.keys():
-            print("using prompt")
-            image= generate_image(data['prompt'])
-            img_byte_array = io.BytesIO()
-            image.save(img_byte_array, format='PNG')
-            img_byte_array.seek(0)
-            image_base64 = base64.b64encode(img_byte_array.read()).decode('utf-8')
-            return jsonify({"type": "base64", "data": image_base64})
+            if "product_url" in data.keys():
+                return generate_image_with_product(prompt=data['prompt'],image_url=data['product_url'])
+            else:
+                print("using prompt")
+                image= generate_image(data['prompt'])
+                img_byte_array = io.BytesIO()
+                image.save(img_byte_array, format='PNG')
+                img_byte_array.seek(0)
+                image_base64 = base64.b64encode(img_byte_array.read()).decode('utf-8')
+                return jsonify({"type": "base64", "data": image_base64})
         else:
             print("using brandkit")
             prompt=geneate_prompt(data)
