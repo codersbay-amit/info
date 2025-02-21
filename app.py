@@ -6,6 +6,7 @@ from diffusers import StableDiffusionXLPipeline, StableDiffusionPipeline
 import random
 from refiner import refiner
 import torch
+from str_to_message import convert_conversation_to_messages
 from peft import PeftModel
 from chat_copy import get_response_chat
 import base64
@@ -160,7 +161,7 @@ def chat():
         return jsonify({"error": "No prompt or session_id provided"}), 400
     prompt = request.form['prompt']
     history = request.form['history']
-    print('history*****',history.split('/n'))
+    history=convert_conversation_to_messages(history)
     response=get_response_chat(user_input=prompt,conversation_history=history)
     return jsonify({"data":response})
     
