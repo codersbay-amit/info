@@ -7,6 +7,7 @@ import random
 from refiner import refiner
 import torch
 from peft import PeftModel
+from chat_copy import get_response_chat
 import base64
 # from sd_3_5 import generate
 from PIL import Image
@@ -152,6 +153,16 @@ def call_method(llm_respond, session_id):
             return f"Function '{func_name}' not found."
     else:
         return "No tool calls found in the response."
+
+@app.route('/chat',methods=["post"])
+def chat():
+    if 'prompt' not in request.form or 'history' not in request.form:
+        return jsonify({"error": "No prompt or session_id provided"}), 400
+    prompt = request.form['prompt']
+    history = request.form['history']
+    response=get_response_chat(user_input=prompt,conversation_history=history)
+    return jsonify({"data":response})
+    
 
 
 @app.route('/process', methods=["POST"])
